@@ -1,0 +1,55 @@
+frappe.listview_settings["Material Request"] = {
+	add_fields: ["material_request_type", "status", "per_ordered", "per_received", "transfer_status","workflow_state"],
+	has_indicator_for_draft: true,
+    get_indicator: function (doc) {
+		var precision = frappe.defaults.get_default("float_precision");
+		if (doc.status == "Stopped") {
+			return [__("Stopped"), "red", "status,=,Stopped"];
+		} else if(doc.docstatus == 0) { 
+            if (doc.workflow_state == "Draft") {
+                return [__("Draft"), "gray", "Draft"]; 
+            } else if (doc.workflow_state == "Under j4 Review") {
+                return [__("Under j4 Review"), "blue", "Under j4 Review"];
+            } else if (doc.workflow_state == "Cancelled by J4") {
+                return [__("Cancelled by J4"), "red", "Cancelled by J4"]; 
+            } else if (doc.workflow_state == "Ready For Withdrawal") {
+                return [__("Ready For Withdrawal"), "blue", "Ready For Withdrawal"]; 
+            } else if (doc.workflow_state == "Withdrawn" && doc.status == "Pending") {
+                return [__("Withdrawn"), "blue", "Withdrawn"];
+            } 
+        }else if (doc.transfer_status && doc.docstatus != 2) {
+			console.log(doc.name)
+			if (doc.transfer_status == "Not Started") {
+				return [__("Not Started"), "orange"];
+			} else if (doc.transfer_status == "In Transit") {
+				return [__("In Transit"), "yellow"];
+			} else if (doc.transfer_status == "Completed") {
+				return [__("Completed"), "green"];
+			}
+		} else if (doc.docstatus == 1  && flt(doc.per_ordered, precision) == 0 && doc.workflow_state == "Ready For Withdrawal") {
+			return [__("Ready For Withdrawal"), "orange", "per_ordered,=,0"];
+		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) < 100) {
+			return [__("Partially ordered"), "yellow", "per_ordered,<,100"];
+		} else if (doc.docstatus == 1 && flt(doc.per_ordered, precision) == 100) {
+			if (
+				doc.material_request_type == "Purchase" &&
+				flt(doc.per_received, precision) < 100 &&
+				flt(doc.per_received, precision) > 0
+			) {
+				return [__("Partially Received"), "yellow", "per_received,<,100"];
+			} else if (doc.material_request_type == "Purchase" && flt(doc.per_received, precision) == 100) {
+				return [__("Received"), "green", "per_received,=,100"];
+			} else if (doc.material_request_type == "Purchase") {
+				return [__("Ordered"), "green", "per_ordered,=,100"];
+			} else if (doc.material_request_type == "Material Transfer") {
+				return [__("Transfered"), "green", "per_ordered,=,100"];
+			} else if (doc.material_request_type == "Material Issue") {
+				return [__("Issued"), "green", "per_ordered,=,100"];
+			} else if (doc.material_request_type == "Customer Provided") {
+				return [__("Received"), "green", "per_ordered,=,100"];
+			} else if (doc.material_request_type == "Manufacture") {
+				return [__("Manufactured"), "green", "per_ordered,=,100"];
+			}
+		}
+	},
+};

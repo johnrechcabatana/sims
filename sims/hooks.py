@@ -28,7 +28,7 @@ app_license = "MIT"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Material Request" : "public/js/material_request_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -95,6 +95,10 @@ app_license = "MIT"
 # Permissions
 # -----------
 # Permissions evaluated in scripted ways
+
+# permission_query_conditions = {
+#     "Material Request": "sims.public.server_script.permission_query.get_material_request_conditions"
+# }
 
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",

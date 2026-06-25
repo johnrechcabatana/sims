@@ -1,0 +1,27 @@
+{
+ "content": null,
+ "creation": "2026-06-24 23:42:23.822705",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "cart",
+ "idx": 5,
+ "modified": "2026-06-25 15:49:00.451297",
+ "modified_by": "Administrator",
+ "module": "Sims",
+ "name": "sims",
+ "owner": "Administrator",
+ "page_name": "sims",
+ "roles": [
+  {
+   "role": "Client"
+  },
+  {
+   "role": "J4 Officer"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Cart Requisition"
+}
