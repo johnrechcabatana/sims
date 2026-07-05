@@ -218,11 +218,28 @@ function submit_cart_request(cart, page) {
             args: { items: cart },
             callback: function(r) {
                 if (!r.exc) {
+                    const mr = r.message;
+                    const url = `${window.location.origin}/app/material-request/${mr}`;
+                    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}`;
+
                     frappe.msgprint({
                         title: __('Success'),
                         indicator: 'green',
-                        message: __('Material Request <b><a href="/app/material-request/{0}">{0}</a></b> has been generated.', [r.message])
+                        message: `
+                            <p>
+                                Material Request
+                                <b><a href="/app/material-request/${mr}">${mr}</a></b>
+                                has been generated.
+                            </p>
+                            <p>&nbsp;</p>
+                            <p style = "text-align:center"><strong> Capture the QR code</strong></p>
+
+                            <div style="text-align:center;">
+                                <img src="${qr}" width="180" height="180">
+                            </div>
+                        `
                     });
+
                     // Reset variables
                     cart.length = 0;
                     refresh_cart_view(page, cart);
