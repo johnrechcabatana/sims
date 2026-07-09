@@ -16,7 +16,9 @@ frappe.listview_settings["Material Request"] = {
                 return [__("Ready For Withdrawal"), "blue", "Ready For Withdrawal"]; 
             } else if (doc.workflow_state == "Withdrawn" && doc.status == "Pending") {
                 return [__("Withdrawn"), "blue", "Withdrawn"];
-            } 
+            } else if (doc.workflow_state == "Expired") {
+                return [__("Expired"), "red", "Expired"];
+            }
         }else if (doc.transfer_status && doc.docstatus != 2) {
 			console.log(doc.name)
 			if (doc.transfer_status == "Not Started") {
