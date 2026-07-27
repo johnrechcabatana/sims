@@ -4,8 +4,8 @@
  "docstatus": 0,
  "doctype": "Page",
  "icon": "cart",
- "idx": 5,
- "modified": "2026-06-25 15:49:00.451297",
+ "idx": 15,
+ "modified": "2026-07-22 14:20:36.622232",
  "modified_by": "Administrator",
  "module": "Sims",
  "name": "sims",
@@ -16,12 +16,12 @@
    "role": "Client"
   },
   {
-   "role": "J4 Officer"
+   "role": "J4"
   }
  ],
  "script": null,
  "standard": "Yes",
  "style": null,
- "system_page": 0,
+ "system_page": 1,
  "title": "Cart Requisition"
 }

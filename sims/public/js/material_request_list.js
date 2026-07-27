@@ -5,18 +5,18 @@ frappe.listview_settings["Material Request"] = {
 		var precision = frappe.defaults.get_default("float_precision");
 		if (doc.status == "Stopped") {
 			return [__("Stopped"), "red", "status,=,Stopped"];
-		} else if(doc.docstatus == 0) { 
-            if (doc.workflow_state == "Draft") {
+		} else if(doc.docstatus == 1) { 
+            if (doc.custom_approval_status == "Draft") {
                 return [__("Draft"), "gray", "Draft"]; 
-            } else if (doc.workflow_state == "Under j4 Review") {
-                return [__("Under j4 Review"), "blue", "Under j4 Review"];
-            } else if (doc.workflow_state == "Cancelled by J4") {
-                return [__("Cancelled by J4"), "red", "Cancelled by J4"]; 
-            } else if (doc.workflow_state == "Ready For Withdrawal") {
-                return [__("Ready For Withdrawal"), "blue", "Ready For Withdrawal"]; 
-            } else if (doc.workflow_state == "Withdrawn" && doc.status == "Pending") {
+            } else if (doc.custom_approval_status == "For Approval") {
+                return [__("For Approval"), "blue", "For Approval"];
+            } else if (doc.custom_approval_status == "Rejected") {
+                return [__("Rejected"), "red", "Rejected"]; 
+            } else if (doc.custom_approval_status == "Approved") {
+                return [__("Approved"), "blue", "Approved"]; 
+            } else if (doc.custom_approval_status == "Withdrawn" && doc.status == "Pending") {
                 return [__("Withdrawn"), "blue", "Withdrawn"];
-            } else if (doc.workflow_state == "Expired") {
+            } else if (doc.custom_approval_status == "Expired") {
                 return [__("Expired"), "red", "Expired"];
             }
         }else if (doc.transfer_status && doc.docstatus != 2) {

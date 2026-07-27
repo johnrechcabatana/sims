@@ -11,6 +11,7 @@ app_license = "MIT"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/sims/css/sims.css"
 # app_include_js = "/assets/sims/js/sims.js"
+# app_include_js = "/assets/sims/js/boot.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/sims/css/sims.css"
@@ -128,6 +129,12 @@ doctype_list_js = {"Material Request" : "public/js/material_request_list.js"}
 # 	}
 # }
 
+doc_events = {
+    "Material Request":{
+        "on_cancel": "sims.server_script.on_cancel_mr",
+        "on_submit":"sims.server_script.on_validate_mr"
+    }
+}
 # Scheduled Tasks
 # ---------------
 
@@ -167,6 +174,8 @@ doctype_list_js = {"Material Request" : "public/js/material_request_list.js"}
 # override_doctype_dashboards = {
 # 	"Task": "sims.task.get_dashboard_data"
 # }
+
+boot_session = "sims.boot.boot_session"
 
 # exempt linked doctypes from being automatically cancelled
 #
