@@ -263,7 +263,6 @@ function fetch_user_material_requests(page) {
             },
             fields: ['name', 'material_request_type', 'transaction_date', 'schedule_date', 'custom_approval_status', 'docstatus'],
             order_by: 'creation desc',
-            limit_page_length: 20 // Fetch the last 20 requests
         },
         callback: function(r) {
             tbody.empty();
@@ -275,7 +274,7 @@ function fetch_user_material_requests(page) {
             }
 
             docs.forEach(doc => {
-             
+                let status_class = ''
                 // Define a display status to prevent 'undefined' from rendering if custom_approval_status is empty
                 let display_status = doc.custom_approval_status || 'Submitted';
                 let status = display_status.toLowerCase();
@@ -296,6 +295,14 @@ function fetch_user_material_requests(page) {
                     status_class = 'status-pending';
                 }
                 else if (status === 'approved') { // Changed to lowercase
+                    status_class = 'status-completed';
+                }
+
+                else if (status === 'ready for withdrawal') { // Changed to lowercase
+                    status_class = 'status-submitted';
+                }
+
+                else if (status === 'completed') { // Changed to lowercase
                     status_class = 'status-completed';
                 }
 
