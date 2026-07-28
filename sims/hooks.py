@@ -132,7 +132,14 @@ doctype_list_js = {"Material Request" : "public/js/material_request_list.js"}
 doc_events = {
     "Material Request":{
         "on_cancel": "sims.server_script.on_cancel_mr",
-        "on_submit":"sims.server_script.on_validate_mr"
+        "on_submit":[
+            "sims.server_script.on_validate_mr",
+        ]
+    },
+    "Stock Entry":{
+        "on_submit":[
+            "sims.server_script.on_submit_mr",
+        ]
     }
 }
 # Scheduled Tasks

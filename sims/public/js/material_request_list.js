@@ -14,11 +14,13 @@ frappe.listview_settings["Material Request"] = {
                 return [__("Rejected"), "red", "Rejected"]; 
             } else if (doc.custom_approval_status == "Approved") {
                 return [__("Approved"), "blue", "Approved"]; 
-            } else if (doc.custom_approval_status == "Withdrawn" && doc.status == "Pending") {
-                return [__("Withdrawn"), "blue", "Withdrawn"];
+            } else if (doc.custom_approval_status == "Ready for Withdrawal") {
+                return [__("Ready for Withdrawal"), "blue", "Ready for Withdrawal"];
             } else if (doc.custom_approval_status == "Expired") {
                 return [__("Expired"), "red", "Expired"];
-            }
+            } else if (doc.custom_approval_status == "Completed") {
+                return [__("Completed"), "green", "Completed"]
+			}
         }else if (doc.transfer_status && doc.docstatus != 2) {
 			console.log(doc.name)
 			if (doc.transfer_status == "Not Started") {

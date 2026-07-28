@@ -259,7 +259,7 @@ function fetch_user_material_requests(page) {
             doctype: 'Material Request',
             filters: {
                 owner: frappe.session.user, // Filters by the current logged-in user
-                docstatus: 1
+                docstatus: ['in',[1,2]]
             },
             fields: ['name', 'material_request_type', 'transaction_date', 'schedule_date', 'custom_approval_status', 'docstatus'],
             order_by: 'creation desc',
@@ -564,7 +564,7 @@ function submit_cart_request(cart, page) {
                     page.body.find('#qr-code-target').html(`<img src="${qr_img_url}" width="100" height="100" alt="QR Link">`);
                     
                     page.body.find('#btn-print-requisition').off('click').on('click', function() {
-                        frappe.utils.print("Material Request", req_number, "Material Request", 0, frappe.boot.lang);
+                        frappe.utils.print("Material Request", req_number, "SIMS REQ", 0, frappe.boot.lang);
                     });
 
                     cart.length = 0;

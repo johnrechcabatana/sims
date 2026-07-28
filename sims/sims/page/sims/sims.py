@@ -79,13 +79,14 @@ def create_material_request(items):
         frappe.throw("Cannot process an empty cart dataset.")
         
     client_full_name = frappe.utils.get_fullname(frappe.session.user)
-    
+    department = frappe.db.get_value("User",frappe.session.user,"custom_department")
     mr_doc = frappe.get_doc({
         "doctype": "Material Request",
         "material_request_type": "Material Issue", 
         "transaction_date": frappe.utils.today(),
         "items": [],
         "custom_client": client_full_name,
+        "custom_department":department,
         "custom_approval_status":"For Approval"
     })
 
@@ -98,7 +99,7 @@ def create_material_request(items):
             "item_code": item_code,
             "qty": entry.get("qty", 1),
             "uom": entry.get("uom"),
-            "warehouse": default_warehouse,
+            "warehouse": default_warehouse, 
             "schedule_date": frappe.utils.today()
         })
 
