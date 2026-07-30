@@ -48,9 +48,9 @@ frappe.pages['sims'].on_page_load = function(wrapper) {
             }
             .hover-popup-content { display: flex; }
             .hover-popup-left { width: 40%; background: #f8fafc; border-right: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; padding: 16px; }
-            .hover-popup-right { width: 60%; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+            .hover-popup-right { width: 60%; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
             .hover-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: -2px; }
-            .hover-value { font-size: 13px; color: #0f172a; margin-bottom: 6px; }
+            .hover-value { font-size: 13px; color: #0f172a; margin-bottom: 4px; }
 
             /* Material Requests Table Styles */
             .mr-table { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -76,7 +76,7 @@ frappe.pages['sims'].on_page_load = function(wrapper) {
                     <div class="d-flex align-items-center mb-2">
                         <span class="panel-number">1</span>
                         <div class="input-group">
-                            <input type="text" id="item-search-input" class="form-control" placeholder="Search items by name, description, or code..." style="height: 42px;">
+                            <input type="text" id="item-search-input" class="form-control" placeholder="Search items by name, description, code, or part number..." style="height: 42px;">
                             <div class="input-group-append">
                                 <select id="filter-category-main" class="form-control" style="height: 42px; border-top-left-radius: 0; border-bottom-left-radius: 0; width: 160px;">
                                     <option value="">All Categories</option>
@@ -146,7 +146,7 @@ frappe.pages['sims'].on_page_load = function(wrapper) {
             </div>
         </div>
 
-        <!-- NEW PANEL: User Requested Material Requests Table -->
+        <!-- Material Requests Table -->
         <div class="row px-3">
             <div class="col-12">
                 <div class="panel-container">
@@ -213,14 +213,13 @@ frappe.pages['sims'].on_page_load = function(wrapper) {
         submit_cart_request(cart, page);
     });
 
-    // Event listener for the refresh button on the table
     page.body.find('#btn-refresh-requests').on('click', function() {
         fetch_user_material_requests(page);
     });
 
     setup_filter_selectors(page, function() {
         fetch_and_render_items('', page, cart);
-        fetch_user_material_requests(page); // Load the table on startup
+        fetch_user_material_requests(page);
     });
 };
 
@@ -248,7 +247,6 @@ function setup_filter_selectors(page, callback_fn) {
     });
 }
 
-// NEW FUNCTION: Fetch material requests created by the current user
 function fetch_user_material_requests(page) {
     let tbody = page.body.find('#user-requests-table-body');
     tbody.html('<tr><td colspan="6" class="text-center text-muted p-3">Loading requests...</td></tr>');
@@ -258,7 +256,7 @@ function fetch_user_material_requests(page) {
         args: {
             doctype: 'Material Request',
             filters: {
-                owner: frappe.session.user, // Filters by the current logged-in user
+                owner: frappe.session.user,
                 docstatus: ['in',[1,2]]
             },
             fields: ['name', 'material_request_type', 'transaction_date', 'schedule_date', 'custom_approval_status', 'docstatus'],
@@ -274,37 +272,15 @@ function fetch_user_material_requests(page) {
             }
 
             docs.forEach(doc => {
-                let status_class = ''
-                // Define a display status to prevent 'undefined' from rendering if custom_approval_status is empty
+                let status_class = '';
                 let display_status = doc.custom_approval_status || 'Submitted';
                 let status = display_status.toLowerCase();
 
-                if (status === 'draft') {
-                    status_class = 'status-draft';
-                }
-                else if (status === 'submitted') {
-                    status_class = 'status-submitted';
-                } 
-                else if (status === 'for approval') { // Changed to lowercase
-                    status_class = 'status-submitted';
-                }
-                else if (status === 'rejected') { // Changed to lowercase
-                    status_class = 'status-stopped';
-                }
-                else if (status === 'for edit') { // Changed to lowercase
-                    status_class = 'status-pending';
-                }
-                else if (status === 'approved') { // Changed to lowercase
-                    status_class = 'status-completed';
-                }
-
-                else if (status === 'ready for withdrawal') { // Changed to lowercase
-                    status_class = 'status-submitted';
-                }
-
-                else if (status === 'completed') { // Changed to lowercase
-                    status_class = 'status-completed';
-                }
+                if (status === 'draft') status_class = 'status-draft';
+                else if (status === 'submitted' || status === 'for approval' || status === 'ready for withdrawal') status_class = 'status-submitted';
+                else if (status === 'rejected') status_class = 'status-stopped';
+                else if (status === 'for edit') status_class = 'status-pending';
+                else if (status === 'approved' || status === 'completed') status_class = 'status-completed';
 
                 let row_html = `
                     <tr>
@@ -360,6 +336,9 @@ function fetch_and_render_items(query, page, cart) {
                 let available_stock = flt(item.actual_qty, 2);
                 let rate = flt(item.valuation_rate || 0.00, 2);
                 
+                let part_number = item.custom_part_number || 'N/A';
+                let condition = item.custom_condition || 'N/A';
+                
                 let cart_item = cart.find(i => i.item_code === item.name);
                 let current_cart_qty = cart_item ? cart_item.qty : 0;
                 
@@ -376,9 +355,18 @@ function fetch_and_render_items(query, page, cart) {
                             data-group="${item.item_group || 'Office Supplies'}"
                             data-uom="${item.stock_uom || 'pcs'}"
                             data-desc="${clean_desc.replace(/"/g, '&quot;')}"
+                            data-part-number="${part_number.replace(/"/g, '&quot;')}"
+                            data-condition="${condition.replace(/"/g, '&quot;')}"
                             data-img="${img_src}">
                             <div class="text-muted small mb-1">${item.name}</div>
                             <div class="text-truncate font-weight-bold mb-1" style="color:#0f172a; font-size:14px;" title="${item.item_name}">${item.item_name}</div>
+                            
+                            <!-- Display Part Number & Condition on Item Card -->
+                            <div class="text-muted small mb-1 d-flex justify-content-between">
+                                <span>Part #: <b>${part_number}</b></span>
+                                <span>Condition: <b>${condition}</b></span>
+                            </div>
+
                             <div class="text-muted small mb-3">Available: <b class="${available_stock <= 0 ? 'text-danger' : 'text-success'}">${available_stock}</b> ${item.stock_uom || 'pcs'}</div>
                             
                             <div class="text-center my-auto py-2" style="height: 100px; display: flex; align-items: center; justify-content: center;">
@@ -393,6 +381,8 @@ function fetch_and_render_items(query, page, cart) {
                                     data-rate="${rate}"
                                     data-stock="${available_stock}"
                                     data-img="${img_src}"
+                                    data-part-number="${part_number.replace(/"/g, '&quot;')}"
+                                    data-condition="${condition.replace(/"/g, '&quot;')}"
                                     ${is_disabled ? 'disabled' : ''}>
                                     ${button_text}
                                 </button>
@@ -403,6 +393,7 @@ function fetch_and_render_items(query, page, cart) {
                 catalog.append(card_html);
             });
 
+            // Hover Event Handlers
             catalog.find('.item-target-card').on('mouseenter', function() {
                 let card = $(this);
                 let code = card.data('code');
@@ -411,6 +402,8 @@ function fetch_and_render_items(query, page, cart) {
                 let uom = card.data('uom');
                 let desc = card.data('desc');
                 let img = card.data('img');
+                let part_num = card.data('part-number');
+                let cond = card.data('condition');
 
                 popup.html(`
                     <div class="hover-popup-content">
@@ -424,6 +417,12 @@ function fetch_and_render_items(query, page, cart) {
                             <div class="hover-label">Item Name</div>
                             <div class="hover-value" style="font-weight: 500;">${name}</div>
                             
+                            <div class="hover-label">Part Number</div>
+                            <div class="hover-value" style="font-weight: 500; color: #0f172a;">${part_num}</div>
+                            
+                            <div class="hover-label">Condition</div>
+                            <div class="hover-value"><span class="badge badge-info">${cond}</span></div>
+                            
                             <div class="hover-label">Categories</div>
                             <div class="hover-value">${group}</div>
                             
@@ -431,7 +430,7 @@ function fetch_and_render_items(query, page, cart) {
                             <div class="hover-value"><span class="badge badge-light border">${uom}</span></div>
                             
                             <div class="hover-label">Description</div>
-                            <div class="hover-value text-muted small" style="line-height: 1.4; max-height: 60px; overflow-y: auto;">${desc}</div>
+                            <div class="hover-value text-muted small" style="line-height: 1.4; max-height: 50px; overflow-y: auto;">${desc}</div>
                         </div>
                     </div>
                 `).stop(true, true).fadeIn(150);
@@ -451,6 +450,7 @@ function fetch_and_render_items(query, page, cart) {
                 popup.stop(true, true).fadeOut(100);
             });
 
+            // Add to Cart Event Handler
             catalog.find('.add-to-cart-btn').off('click').on('click', function(e) {
                 e.stopPropagation();
                 let btn = $(this);
@@ -459,7 +459,9 @@ function fetch_and_render_items(query, page, cart) {
                 let uom = btn.data('uom');
                 let rate = flt(btn.data('rate'));
                 let max_stock = flt(btn.data('stock'));
-                let img = btn.data('img'); // Grab image url
+                let img = btn.data('img');
+                let part_num = btn.data('part-number');
+                let cond = btn.data('condition');
 
                 let existing = cart.find(i => i.item_code === item_code);
                 if (existing) {
@@ -470,7 +472,6 @@ function fetch_and_render_items(query, page, cart) {
                         return;
                     }
                 } else {
-                    // Push the image to the cart item object
                     cart.push({ 
                         item_code: item_code, 
                         item_name: item_name, 
@@ -478,7 +479,9 @@ function fetch_and_render_items(query, page, cart) {
                         uom: uom, 
                         rate: rate, 
                         max_stock: max_stock,
-                        image: img 
+                        image: img,
+                        custom_part_number: part_num,
+                        custom_condition: cond
                     });
                 }
                 
@@ -506,7 +509,6 @@ function refresh_cart_view(page, cart) {
     }
 
     cart.forEach((item, index) => {
-        // Build an image tag if the cart item has an image saved
         let img_html = item.image ? 
             `<img src="${item.image}" style="width: 44px; height: 44px; object-fit: contain; border: 1px solid #e2e8f0; border-radius: 6px; margin-right: 12px; background: #fff;" alt="img">` : 
             '';
@@ -516,7 +518,7 @@ function refresh_cart_view(page, cart) {
                 ${img_html}
                 <div style="flex: 1; padding-right: 24px;">
                     <div class="font-weight-bold text-truncate text-sm" style="color: #1e293b; max-width: 90%;" title="${item.item_name}">${item.item_name}</div>
-                    <div class="text-muted small">${item.item_code}</div>
+                    <div class="text-muted small">${item.item_code} | P/N: ${item.custom_part_number || 'N/A'}</div>
                     <div class="d-flex justify-content-between align-items-center mt-1">
                         <div class="text-muted small">Qty: <input type="number" class="d-inline-block text-center form-control form-control-sm cart-qty-input" data-index="${index}" value="${item.qty}" min="1" max="${item.max_stock}" style="width: 55px; height:24px; padding:2px;"> ${item.uom}</div>
                         <div class="font-weight-bold text-sm" style="color:#0f172a;">₱${format_currency(item.rate * item.qty)}</div>
@@ -580,7 +582,6 @@ function submit_cart_request(cart, page) {
                     page.body.find('#filter-category-main, #filter-category, #filter-units, #filter-brands').val('');
                     fetch_and_render_items('', page, cart);
                     
-                    // Trigger refresh to update the new Material Requests table
                     fetch_user_material_requests(page);
                     
                     frappe.show_alert({ message: __('Material Request generated successfully!'), indicator: 'green' });

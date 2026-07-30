@@ -8,52 +8,57 @@ def get_items_with_stock(search_text="", item_group="", stock_uom="", brand=""):
     joining with total current stock balances across active bins.
     """
     conditions = ["item.disabled = 0", "item.is_stock_item = 1"]
-    args = {}
+    values = {}
     
-    # 1. Text Search Input Filter
     if search_text:
-        conditions.append("(item.item_name LIKE %(search)s OR item.name LIKE %(search)s OR item.description LIKE %(search)s)")
-        args["search"] = f"%{search_text}%"
-        
-    # 2. Dropdown Filter Extensions
+        conditions.append("""(
+            item.name LIKE %(search)s 
+            OR item.item_name LIKE %(search)s 
+            OR item.description LIKE %(search)s
+            OR item.custom_part_number LIKE %(search)s
+        )""")
+        values["search"] = f"%{search_text}%"
+
     if item_group:
         conditions.append("item.item_group = %(item_group)s")
-        args["item_group"] = item_group
-        
+        values["item_group"] = item_group
+
     if stock_uom:
         conditions.append("item.stock_uom = %(stock_uom)s")
-        args["stock_uom"] = stock_uom
-        
+        values["stock_uom"] = stock_uom
+
     if brand:
         conditions.append("item.brand = %(brand)s")
-        args["brand"] = brand
+        values["brand"] = brand
 
-    where_clause = "WHERE " + " AND ".join(conditions)
+    where_clause = " AND ".join(conditions)
 
-    items = frappe.db.sql(f"""
+    # Note: Included custom_part_number and custom_condition in SELECT clause
+    query = f"""
         SELECT 
-            item.description,
             item.name,
+            item.item_name,
             item.item_group,
-            item.item_name, 
-            item.image, 
             item.stock_uom,
+            item.description,
+            item.image,
             item.valuation_rate,
-            IFNULL(SUM(bin.actual_qty), 0) as actual_qty
+            item.custom_part_number,
+            item.custom_condition,
+            COALESCE(SUM(bin.actual_qty), 0) AS actual_qty
         FROM 
             `tabItem` item
         LEFT JOIN 
             `tabBin` bin ON bin.item_code = item.name
-        {where_clause}
+        WHERE 
+            {where_clause}
         GROUP BY 
             item.name
         ORDER BY 
             item.item_name ASC
-        LIMIT 24
-    """, args, as_dict=1)
-
-    return items
-
+    """
+    
+    return frappe.db.sql(query, values, as_dict=True)
 
 @frappe.whitelist()
 def get_filter_options():

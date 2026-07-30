@@ -1,5 +1,9 @@
 import frappe
 
+from frappe.model.naming import make_autoname
+from frappe.utils import nowdate
+
+
 @frappe.whitelist()
 def on_cancel_mr(self, method=None):
     frappe.db.set_value("Material Request",self.name,"custom_approval_status","For Edit")
@@ -62,3 +66,7 @@ def get_dashboard_data():
         'reorders': reorders,
         'requests': requests
     }
+
+def autoname(self, method=None):
+
+    self.name = make_autoname(f"YYYY.MM.DD.#####")

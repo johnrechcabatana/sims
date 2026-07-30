@@ -140,7 +140,12 @@ doc_events = {
         "on_submit":[
             "sims.server_script.on_submit_mr",
         ]
-    }
+    },
+    # "Item":{
+    #     "autoname":{
+    #          "sims.server_script.autoname"
+    #     }
+    # }
 }
 # Scheduled Tasks
 # ---------------
