@@ -280,7 +280,8 @@ function fetch_user_material_requests(page) {
                 else if (status === 'submitted' || status === 'for approval' || status === 'ready for withdrawal') status_class = 'status-submitted';
                 else if (status === 'rejected') status_class = 'status-stopped';
                 else if (status === 'for edit') status_class = 'status-pending';
-                else if (status === 'approved' || status === 'completed') status_class = 'status-completed';
+                else if (status === 'approved' || status === 'completed' || status == "recorded request") status_class = 'status-completed';
+        
 
                 let row_html = `
                     <tr>

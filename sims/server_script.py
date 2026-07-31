@@ -7,6 +7,27 @@ from frappe.utils import nowdate
 @frappe.whitelist()
 def on_cancel_mr(self, method=None):
     frappe.db.set_value("Material Request",self.name,"custom_approval_status","For Edit")
+    recipients = [self.owner]
+    # Optional: Add specific roles or users (e.g., Purchase Managers)
+    # purchase_managers = frappe.get_all("Has Role", filters={"role": "Purchase Manager", "parenttype": "User"}, fields=["parent"])
+    # recipients.extend([user.parent for user in purchase_managers])
+
+    # 2. Trigger the notification bell for each recipient
+    for user in set(recipients):
+        # Don't notify the person who is doing the cancellation unless desired
+        if user == frappe.session.user:
+            continue
+            
+        doc = frappe.get_doc({
+            "doctype": "Notification Log",
+            "subject": f"MR {self.name} has been set to 'For Edit' by J4",
+            "for_user": user,
+            "type": "Alert",  # Options: 'Alert', 'Share', 'Assignment', 'Mention'
+            "document_type": "Material Request",
+            "document_name": self.name,
+            "email_content": f"Material Request {self.name} was canceled and moved back to 'For Edit' status."
+        })
+        doc.insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def on_validate_mr(self, method=None):
@@ -20,6 +41,28 @@ def on_submit_mr(self, method=None):
     for i in self.items:
         if i.material_request:
             frappe.db.set_value("Material Request",i.material_request,"custom_approval_status","Completed")
+            owner = frappe.db.get_value("Material Request",i.material_request, "owner")
+            recipients = [owner]
+            # Optional: Add specific roles or users (e.g., Purchase Managers)
+            # purchase_managers = frappe.get_all("Has Role", filters={"role": "Purchase Manager", "parenttype": "User"}, fields=["parent"])
+            # recipients.extend([user.parent for user in purchase_managers])
+
+            # 2. Trigger the notification bell for each recipient
+            for user in set(recipients):
+                # Don't notify the person who is doing the cancellation unless desired
+                if user == frappe.session.user:
+                    continue
+                    
+                doc = frappe.get_doc({
+                    "doctype": "Notification Log",
+                    "subject": f"MR {self.name} has been Completed",
+                    "for_user": user,
+                    "type": "Alert",  # Options: 'Alert', 'Share', 'Assignment', 'Mention'
+                    "document_type": "Material Request",
+                    "document_name": self.name,
+                    "email_content": f"Material Request {self.name} was completed"
+                })
+                doc.insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def get_dashboard_data():
@@ -55,9 +98,9 @@ def get_dashboard_data():
         ],
         filters={
             'docstatus': 1,
-            'custom_approval_status': ['in', ['Ready for Withdrawal', 'Approved']]
+            'custom_approval_status': ['in', ['Ready for Withdrawal', 'Approved', 'Recorded Request']]
         },
-        order_by='creation desc'
+        order_by='modified desc'
     )
     return {
         'total_items': total_items,
@@ -67,6 +110,6 @@ def get_dashboard_data():
         'requests': requests
     }
 
-def autoname(self, method=None):
+# def autoname(self, method=None):
 
-    self.name = make_autoname(f"YYYY.MM.DD.#####")
+#     self.name = make_autoname(f"YYYY.MM.DD.#####")

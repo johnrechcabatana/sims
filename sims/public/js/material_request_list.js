@@ -1,6 +1,7 @@
 frappe.listview_settings["Material Request"] = {
 	add_fields: ["material_request_type", "status", "per_ordered", "per_received", "transfer_status","workflow_state"],
 	has_indicator_for_draft: true,
+	has_indicator_for_cancelled: true,
     get_indicator: function (doc) {
 		var precision = frappe.defaults.get_default("float_precision");
 		if (doc.status == "Stopped") {
@@ -20,8 +21,14 @@ frappe.listview_settings["Material Request"] = {
                 return [__("Expired"), "red", "Expired"];
             } else if (doc.custom_approval_status == "Completed") {
                 return [__("Completed"), "green", "Completed"]
+			} else if (doc.custom_approval_status == "Recorded Request") {
+                return [__("Recorded Request"), "green", "Recorded Request"]
 			}
-        }else if (doc.transfer_status && doc.docstatus != 2) {
+        }else if (doc.docstatus == 2 && doc.custom_approval_status == "For Edit"){
+			return [__("For Edit"), "red", "For Edit"]
+		}
+
+		else if (doc.transfer_status && doc.docstatus != 2) {
 			console.log(doc.name)
 			if (doc.transfer_status == "Not Started") {
 				return [__("Not Started"), "orange"];
